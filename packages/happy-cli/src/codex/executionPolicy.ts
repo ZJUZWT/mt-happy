@@ -16,6 +16,7 @@ export function resolveCodexExecutionPolicy(
             // Codex native modes
             case 'default': return 'untrusted';                    // Ask for non-trusted commands
             case 'read-only': return 'never';                      // Never ask, read-only enforced by sandbox
+            case 'dangerous': return 'never';                      // Never ask, full system access
             case 'safe-yolo': return 'on-failure';                 // Auto-run, ask only on failure
             case 'yolo': return 'on-failure';                      // Auto-run, ask only on failure
             // Defensive fallback for Claude-specific modes (backward compatibility)
@@ -31,6 +32,7 @@ export function resolveCodexExecutionPolicy(
             // Codex native modes
             case 'default': return 'workspace-write';              // Can write in workspace
             case 'read-only': return 'read-only';                  // Read-only filesystem
+            case 'dangerous': return 'danger-full-access';         // Full system access
             case 'safe-yolo': return 'workspace-write';            // Can write in workspace
             case 'yolo': return 'danger-full-access';              // Full system access
             // Defensive fallback for Claude-specific modes

@@ -28,4 +28,13 @@ describe('resolveCodexExecutionPolicy', () => {
             sandbox: 'read-only',
         });
     });
+
+    it('maps dangerous mode to never + danger-full-access without managed sandbox', () => {
+        const policy = resolveCodexExecutionPolicy('dangerous', false);
+
+        expect(policy).toEqual({
+            approvalPolicy: 'never',
+            sandbox: 'danger-full-access',
+        });
+    });
 });

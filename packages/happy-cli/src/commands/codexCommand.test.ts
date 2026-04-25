@@ -55,6 +55,8 @@ describe('handleCodexCommand', () => {
     expect(mocks.mockRunCodex).toHaveBeenCalledWith({
       credentials: { token: 'token' },
       startedBy: 'terminal',
+      permissionMode: undefined,
+      title: undefined,
       noSandbox: false,
       resumeThreadId: undefined,
     })
@@ -63,10 +65,10 @@ describe('handleCodexCommand', () => {
     ).toBeLessThan(mocks.mockRunCodex.mock.invocationCallOrder[0])
   })
 
-  it('passes parsed no-sandbox and resume flags through to runCodex', async () => {
-    mocks.mockExtractNoSandboxFlag.mockReturnValue({
-      noSandbox: true,
-      args: ['--resume', 'thread-123', '--started-by', 'daemon'],
+    it('passes parsed no-sandbox and resume flags through to runCodex', async () => {
+        mocks.mockExtractNoSandboxFlag.mockReturnValue({
+            noSandbox: true,
+            args: ['--resume', 'thread-123', '--started-by', 'daemon'],
     })
     mocks.mockExtractCodexResumeFlag.mockReturnValue({
       resumeThreadId: 'thread-123',
@@ -78,8 +80,54 @@ describe('handleCodexCommand', () => {
     expect(mocks.mockRunCodex).toHaveBeenCalledWith({
       credentials: { token: 'token' },
       startedBy: 'daemon',
+      permissionMode: undefined,
+      title: undefined,
       noSandbox: true,
       resumeThreadId: 'thread-123',
+    })
+    })
+
+  it('passes dangerous mode and title through to runCodex', async () => {
+    mocks.mockExtractNoSandboxFlag.mockReturnValue({
+      noSandbox: false,
+      args: ['--dangerously-bypass-approvals-and-sandbox', '--title', 'Mote task'],
+    })
+    mocks.mockExtractCodexResumeFlag.mockReturnValue({
+      resumeThreadId: null,
+      args: ['--dangerously-bypass-approvals-and-sandbox', '--title', 'Mote task'],
+    })
+
+    await handleCodexCommand(['--dangerously-bypass-approvals-and-sandbox', '--title', 'Mote task'])
+
+    expect(mocks.mockRunCodex).toHaveBeenCalledWith({
+      credentials: { token: 'token' },
+      startedBy: undefined,
+      permissionMode: 'dangerous',
+      title: 'Mote task',
+      noSandbox: false,
+      resumeThreadId: undefined,
+    })
+  })
+
+  it('supports equals syntax for permission mode and title', async () => {
+    mocks.mockExtractNoSandboxFlag.mockReturnValue({
+      noSandbox: false,
+      args: ['--permission-mode=dangerous', '--title=Mote task B'],
+    })
+    mocks.mockExtractCodexResumeFlag.mockReturnValue({
+      resumeThreadId: null,
+      args: ['--permission-mode=dangerous', '--title=Mote task B'],
+    })
+
+    await handleCodexCommand(['--permission-mode=dangerous', '--title=Mote task B'])
+
+    expect(mocks.mockRunCodex).toHaveBeenCalledWith({
+      credentials: { token: 'token' },
+      startedBy: undefined,
+      permissionMode: 'dangerous',
+      title: 'Mote task B',
+      noSandbox: false,
+      resumeThreadId: undefined,
     })
   })
 })

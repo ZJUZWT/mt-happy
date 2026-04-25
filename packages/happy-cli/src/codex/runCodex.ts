@@ -33,6 +33,7 @@ import { resolveCodexExecutionPolicy } from './executionPolicy';
 import { mapCodexMcpMessageToSessionEnvelopes, mapCodexProcessorMessageToSessionEnvelopes } from './utils/sessionProtocolMapper';
 import { resumeExistingThread } from './resumeExistingThread';
 import { emitReadyIfIdle } from './emitReadyIfIdle';
+import { resolveCodexMessagePermissionMode } from './permissionMode';
 
 /**
  * Extracts a human-readable error from a codex task_complete/turn_aborted event.
@@ -57,6 +58,8 @@ export async function runCodex(opts: {
     startedBy?: 'daemon' | 'terminal';
     noSandbox?: boolean;
     resumeThreadId?: string;
+    permissionMode?: import('@/api/types').PermissionMode;
+    title?: string;
 }): Promise<void> {
     // Early check: ensure Codex CLI is installed before proceeding
     try {
@@ -92,7 +95,7 @@ export async function runCodex(opts: {
     const api = await ApiClient.create(opts.credentials);
 
     // Log startup options
-    logger.debug(`[codex] Starting with options: startedBy=${opts.startedBy || 'terminal'}`);
+    logger.debug(`[codex] Starting with options: startedBy=${opts.startedBy || 'terminal'}, initialPermissionMode=${opts.permissionMode || 'default'}, title=${opts.title || 'none'}`);
 
     //
     // Machine
@@ -120,6 +123,7 @@ export async function runCodex(opts: {
         machineId,
         startedBy: opts.startedBy,
         sandbox: sandboxConfig,
+        title: opts.title,
     });
 
     // Check for session reconnection env vars (set by daemon for resume-in-place)
@@ -171,6 +175,14 @@ export async function runCodex(opts: {
     });
     session = initialSession;
 
+    if (opts.title) {
+        session.sendClaudeSessionMessage({
+            type: 'summary',
+            summary: opts.title,
+            leafUuid: randomUUID(),
+        });
+    }
+
     // On reconnect, un-archive the session and skip replaying old messages.
     if (reconnectSessionId) {
         session.suppressNextArchiveSignal();
@@ -210,37 +222,24 @@ export async function runCodex(opts: {
 
     // Track current overrides to apply per message
     // Use shared PermissionMode type from api/types for cross-agent compatibility
-    let currentPermissionMode: import('@/api/types').PermissionMode | undefined = undefined;
+    let currentPermissionMode: import('@/api/types').PermissionMode | undefined = opts.permissionMode;
     let currentModel: string | undefined = undefined;
-
-    // Valid Codex permission modes from remote messages. Matches the modes
-    // the mobile UI exposes for Codex sessions (see modelModeOptions.ts:
-    // getCodexPermissionModes) and mirrors the Gemini validation pattern at
-    // runGemini.ts:222. Anything outside this set is silently ignored — the
-    // previous code blindly cast `message.meta.permissionMode as PermissionMode`
-    // at runtime, meaning a crafted value like `'totally_unsafe'` would be
-    // accepted and then fall through to the `default` branch in
-    // resolveCodexExecutionPolicy() — or worse, an attacker-chosen valid value
-    // could escalate sandbox scope (issue #1092).
-    const VALID_REMOTE_PERMISSION_MODES: readonly PermissionMode[] = [
-        'default',
-        'read-only',
-        'safe-yolo',
-        'yolo',
-    ];
 
     session.onUserMessage((message) => {
         // Resolve permission mode (validate against Codex-native modes)
-        let messagePermissionMode = currentPermissionMode;
-        if (message.meta?.permissionMode) {
-            const incoming = message.meta.permissionMode as PermissionMode;
-            if (VALID_REMOTE_PERMISSION_MODES.includes(incoming)) {
-                messagePermissionMode = incoming;
-                currentPermissionMode = messagePermissionMode;
-                logger.debug(`[Codex] Permission mode updated from user message to: ${currentPermissionMode}`);
-            } else {
-                logger.debug(`[Codex] Ignoring invalid permission mode from user message: ${String(message.meta.permissionMode)}`);
-            }
+        const resolvedPermission = resolveCodexMessagePermissionMode({
+            startupPermissionMode: opts.permissionMode,
+            currentPermissionMode,
+            incomingPermissionMode: message.meta?.permissionMode,
+        });
+        let messagePermissionMode = resolvedPermission.permissionMode;
+        currentPermissionMode = resolvedPermission.currentPermissionMode;
+        if (resolvedPermission.ignoredDefaultOverride) {
+            logger.debug(`[Codex] Ignoring default permission mode from user message; using startup mode: ${currentPermissionMode}`);
+        } else if (resolvedPermission.ignoredInvalidMode) {
+            logger.debug(`[Codex] Ignoring invalid permission mode from user message: ${String(message.meta?.permissionMode)}`);
+        } else if (message.meta?.permissionMode) {
+            logger.debug(`[Codex] Permission mode updated from user message to: ${currentPermissionMode}`);
         } else {
             logger.debug(`[Codex] User message received with no permission mode override, using current: ${currentPermissionMode ?? 'default (effective)'}`);
         }
@@ -694,7 +693,7 @@ export async function runCodex(opts: {
                     }));
                 }
 
-                const turnPrompt = first
+                const turnPrompt = first && !opts.title
                     ? message.message + '\n\n' + CHANGE_TITLE_INSTRUCTION
                     : message.message;
 

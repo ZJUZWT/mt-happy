@@ -35,6 +35,8 @@ export interface CreateSessionMetadataOptions {
     sandbox?: SandboxConfig;
     /** Whether the backend runs with "dangerously skip permissions" behavior */
     dangerouslySkipPermissions?: boolean;
+    /** Optional initial title shown in session lists */
+    title?: string;
 }
 
 /**
@@ -91,6 +93,13 @@ export function createSessionMetadata(opts: CreateSessionMetadataOptions): Sessi
         sandbox: opts.sandbox?.enabled ? opts.sandbox : null,
         dangerouslySkipPermissions: opts.dangerouslySkipPermissions ?? null,
     };
+
+    if (opts.title) {
+        metadata.summary = {
+            text: opts.title,
+            updatedAt: Date.now(),
+        };
+    }
 
     return { state, metadata };
 }

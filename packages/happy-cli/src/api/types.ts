@@ -25,14 +25,14 @@ export type {
  * Must match MessageMetaSchema.permissionMode enum values
  *
  * Claude modes: default, acceptEdits, bypassPermissions, plan
- * Codex modes: read-only, safe-yolo, yolo
+ * Codex modes: read-only, safe-yolo, yolo, dangerous
  *
  * When calling Claude SDK, Codex modes are mapped at the SDK boundary:
  * - yolo → bypassPermissions
  * - safe-yolo → default
  * - read-only → default
  */
-export type PermissionMode = 'default' | 'acceptEdits' | 'bypassPermissions' | 'plan' | 'read-only' | 'safe-yolo' | 'yolo'
+export type PermissionMode = 'default' | 'acceptEdits' | 'bypassPermissions' | 'plan' | 'read-only' | 'safe-yolo' | 'yolo' | 'dangerous'
 
 /**
  * Usage data type from Claude

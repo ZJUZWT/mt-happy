@@ -71,4 +71,17 @@ describe('createSessionMetadata', () => {
 
         expect(metadata.dangerouslySkipPermissions).toBe(true);
     });
+
+    it('sets metadata.summary when an initial title is provided', () => {
+        const { metadata } = createSessionMetadata({
+            flavor: 'codex',
+            machineId: 'machine-6',
+            title: 'Mote task',
+        });
+
+        expect(metadata.summary).toEqual({
+            text: 'Mote task',
+            updatedAt: expect.any(Number),
+        });
+    });
 });
