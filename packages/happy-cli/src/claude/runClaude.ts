@@ -59,6 +59,11 @@ const DEFAULT_CLAUDE_MODEL = 'opus';
 const DEFAULT_CLAUDE_EFFORT: 'low' | 'medium' | 'high' | 'max' = 'medium';
 
 export async function runClaude(credentials: Credentials, options: StartOptions = {}): Promise<void> {
+    // Ensure MT_HAPPY_ENGINE is set globally so both local and remote modes
+    // can resolve the correct CLI binary (fixes remote mode "Not logged in" and
+    // Ctrl+T switch-back picking wrong binary)
+    process.env.MT_HAPPY_ENGINE = options.engine || 'claude-internal';
+
     logger.debug(`[CLAUDE] ===== CLAUDE MODE STARTING =====`);
     logger.debug(`[CLAUDE] This is the Claude agent, NOT Gemini`);
     
