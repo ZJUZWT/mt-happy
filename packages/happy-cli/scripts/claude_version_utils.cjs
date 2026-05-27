@@ -444,6 +444,11 @@ const ENGINE_CONFIG = {
         npmPackage: '@tencent-ai/codebuddy-code',
         npmEntry: 'bin/codebuddy',
     },
+    'codex': {
+        binaryName: 'codex',
+        npmPackage: '@openai/codex',
+        npmEntry: 'bin/codex.js',
+    },
     'claude': {
         binaryName: 'claude',
         npmPackage: '@anthropic-ai/claude-code',

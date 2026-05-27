@@ -623,8 +623,8 @@ ${chalk.bold('To clean up runaway processes:')} Use ${chalk.cyan('happy doctor c
         options.jsRuntime = runtime
       } else if (arg === '--engine') {
         const engine = args[++i]
-        if (engine !== 'claude-internal' && engine !== 'codebuddy' && engine !== 'claude') {
-          console.error(chalk.red(`Invalid --engine value: ${engine}. Must be 'claude-internal', 'codebuddy', or 'claude'`))
+        if (!['claude-internal', 'codebuddy', 'codex', 'claude'].includes(engine)) {
+          console.error(chalk.red(`Invalid --engine value: ${engine}. Must be 'claude-internal', 'codebuddy', 'codex', or 'claude'`))
           process.exit(1)
         }
         options.engine = engine

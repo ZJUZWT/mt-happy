@@ -36,8 +36,8 @@ import { RawJSONLinesSchema, type RawJSONLines } from './types';
 /** JavaScript runtime to use for spawning Claude Code */
 export type JsRuntime = 'node' | 'bun'
 
-/** CLI engine to use for spawning Claude Code */
-export type CliEngine = 'claude-internal' | 'codebuddy' | 'claude'
+/** CLI engine to use for spawning */
+export type CliEngine = 'claude-internal' | 'codebuddy' | 'codex' | 'claude'
 
 export interface StartOptions {
     model?: string
