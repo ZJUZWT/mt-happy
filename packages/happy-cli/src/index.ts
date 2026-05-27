@@ -587,6 +587,7 @@ ${chalk.bold('To clean up runaway processes:')} Use ${chalk.cyan('happy doctor c
     let showHelp = false
     let showVersion = false
     let chromeOverride: boolean | undefined = undefined  // Track explicit --chrome or --no-chrome
+    let offlineMode = false  // Track --offline/--local flag
     const unknownArgs: string[] = [] // Collect unknown args to pass through to claude
     const parsedSandboxFlag = extractNoSandboxFlag(args)
     options.noSandbox = parsedSandboxFlag.noSandbox
@@ -620,6 +621,15 @@ ${chalk.bold('To clean up runaway processes:')} Use ${chalk.cyan('happy doctor c
           process.exit(1)
         }
         options.jsRuntime = runtime
+      } else if (arg === '--engine') {
+        const engine = args[++i]
+        if (engine !== 'claude-internal' && engine !== 'codebuddy' && engine !== 'claude') {
+          console.error(chalk.red(`Invalid --engine value: ${engine}. Must be 'claude-internal', 'codebuddy', or 'claude'`))
+          process.exit(1)
+        }
+        options.engine = engine
+      } else if (arg === '--offline' || arg === '--local') {
+        offlineMode = true
       } else if (arg === '--claude-env') {
         // Parse KEY=VALUE environment variable to pass to Claude
         const envArg = args[++i]
@@ -671,45 +681,51 @@ ${chalk.bold('To clean up runaway processes:')} Use ${chalk.cyan('happy doctor c
     // Show help
     if (showHelp) {
       console.log(`
-${chalk.bold('happy')} - Claude Code On the Go
+${chalk.bold('mt-happy')} - Claude Code On the Go
 
 ${chalk.bold('Usage:')}
-  happy [options]         Start Claude with mobile control
-  happy auth              Manage authentication
-  happy resume            Resume a previous Happy session by Happy session ID
-  happy codex             Start Codex mode
-  happy gemini            Start Gemini mode (ACP)
-  happy acp               Start a generic ACP-compatible agent
-  happy connect           Connect AI vendor API keys
-  happy sandbox           Configure and manage OS-level sandboxing
-  happy notify            Send push notification
-  happy daemon            Manage background service that allows
+  mt-happy [options]         Start Claude with mobile control
+  mt-happy auth              Manage authentication
+  mt-happy resume            Resume a previous Happy session by Happy session ID
+  mt-happy codex             Start Codex mode
+  mt-happy gemini            Start Gemini mode (ACP)
+  mt-happy acp               Start a generic ACP-compatible agent
+  mt-happy connect           Connect AI vendor API keys
+  mt-happy sandbox           Configure and manage OS-level sandboxing
+  mt-happy notify            Send push notification
+  mt-happy daemon            Manage background service that allows
                             to spawn new sessions away from your computer
-  happy doctor            System diagnostics & troubleshooting
+  mt-happy doctor            System diagnostics & troubleshooting
+
+${chalk.bold('MT-Happy Options:')}
+  --engine <engine>          CLI engine to use (claude-internal | codebuddy | claude)
+  --offline, --local         Run in offline mode (skip auth, run Claude directly)
 
 ${chalk.bold('Examples:')}
-  happy                    Start session
-  happy resume cmmij8      Resume a previous session by Happy session ID
-  happy --yolo             Start with bypassing permissions
+  mt-happy                    Start session
+  mt-happy --engine codebuddy Start with codebuddy engine
+  mt-happy --offline          Start in offline mode (no auth)
+  mt-happy resume cmmij8      Resume a previous session by Happy session ID
+  mt-happy --yolo             Start with bypassing permissions
                             happy sugar for --dangerously-skip-permissions
-  happy --chrome           Enable Chrome browser access for this session
-  happy --no-chrome        Disable Chrome even if default is on
-  happy --no-sandbox       Disable Happy sandbox for this session
-  happy --js-runtime bun   Use bun instead of node to spawn Claude Code
-  happy --claude-env ANTHROPIC_BASE_URL=http://127.0.0.1:3456
+  mt-happy --chrome           Enable Chrome browser access for this session
+  mt-happy --no-chrome        Disable Chrome even if default is on
+  mt-happy --no-sandbox       Disable Happy sandbox for this session
+  mt-happy --js-runtime bun   Use bun instead of node to spawn Claude Code
+  mt-happy --claude-env ANTHROPIC_BASE_URL=http://127.0.0.1:3456
                            Use a custom API endpoint (e.g., claude-code-router)
-  happy acp gemini         Start Gemini via generic ACP runner
-  happy acp -- opencode --acp
+  mt-happy acp gemini         Start Gemini via generic ACP runner
+  mt-happy acp -- opencode --acp
                            Start a custom ACP command
-  happy acp opencode --verbose
+  mt-happy acp opencode --verbose
                            Print raw ACP backend/envelope events
-  happy auth login --force Authenticate
-  happy doctor             Run diagnostics
+  mt-happy auth login --force Authenticate
+  mt-happy doctor             Run diagnostics
 
-${chalk.bold('Happy supports ALL Claude options!')}
-  Use any claude flag with happy as you would with claude. Our favorite:
+${chalk.bold('MT-Happy supports ALL Claude options!')}
+  Use any claude flag with mt-happy as you would with claude. Our favorite:
 
-  happy --resume
+  mt-happy --resume
 
 ${chalk.gray('─'.repeat(60))}
 ${chalk.bold.cyan('Claude Code Options (from `claude --help`):')}
@@ -729,8 +745,35 @@ ${chalk.bold.cyan('Claude Code Options (from `claude --help`):')}
 
     // Show version
     if (showVersion) {
-      console.log(`happy version: ${packageJson.version}`)
+      console.log(`mt-happy version: ${packageJson.version}`)
       // Don't exit - continue to pass --version to Claude Code
+    }
+
+    // Offline mode - skip auth and run Claude directly
+    if (offlineMode) {
+      try {
+        const { claudeLocal } = await import('./claude/claudeLocal')
+        await claudeLocal({
+          path: process.cwd(),
+          sessionId: null,
+          onSessionFound: () => {},
+          onThinkingChange: () => {},
+          abort: new AbortController().signal,
+          claudeEnvVars: options.claudeEnvVars,
+          claudeArgs: options.claudeArgs,
+          mcpServers: {},
+          allowedTools: [],
+          engine: options.engine,
+        })
+        process.exit(0)
+      } catch (error) {
+        console.error(chalk.red('Error:'), error instanceof Error ? error.message : 'Unknown error')
+        if (process.env.DEBUG) {
+          console.error(error)
+        }
+        process.exit(1)
+      }
+      return
     }
 
     // Normal flow - auth and machine setup

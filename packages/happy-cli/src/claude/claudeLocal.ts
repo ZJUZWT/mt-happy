@@ -12,6 +12,7 @@ import { projectPath } from "@/projectPath";
 import { systemPrompt } from "./utils/systemPrompt";
 import type { SandboxConfig } from "@/persistence";
 import { initializeSandbox, wrapCommand } from "@/sandbox/manager";
+import type { CliEngine } from "./runClaude";
 
 /**
  * Error thrown when the Claude process exits with a non-zero exit code.
@@ -47,6 +48,7 @@ export async function claudeLocal(opts: {
     /** Path to temporary settings file with SessionStart hook (optional - for session tracking) */
     hookSettingsPath?: string,
     sandboxConfig?: SandboxConfig,
+    engine?: CliEngine,
 }) {
 
     // Ensure project directory exists
@@ -259,7 +261,8 @@ export async function claudeLocal(opts: {
             // Launcher only intercepts fetch for thinking state tracking
             const env = {
                 ...process.env,
-                ...opts.claudeEnvVars
+                ...opts.claudeEnvVars,
+                MT_HAPPY_ENGINE: opts.engine || 'claude-internal',
             }
 
             if (opts.mcpServers && Object.keys(opts.mcpServers).length > 0) {

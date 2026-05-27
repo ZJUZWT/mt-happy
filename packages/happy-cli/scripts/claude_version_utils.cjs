@@ -430,8 +430,75 @@ function findLatestVersionBinary(versionsDir, binaryName = null) {
 }
 
 /**
+ * Engine configuration for MT-Happy
+ * Maps engine names to their binary names and npm package paths
+ */
+const ENGINE_CONFIG = {
+    'claude-internal': {
+        binaryName: 'claude-internal',
+        npmPackage: '@tencent/claude-code-internal',
+        npmEntry: 'dist/claude-code-internal.js',
+    },
+    'codebuddy': {
+        binaryName: 'codebuddy',
+        npmPackage: '@tencent-ai/codebuddy-code',
+        npmEntry: 'bin/codebuddy',
+    },
+    'claude': {
+        binaryName: 'claude',
+        npmPackage: '@anthropic-ai/claude-code',
+        npmEntry: 'cli.js',
+    },
+};
+
+/**
+ * Find CLI path for the specified engine
+ */
+function findEngineCliPath(engineName) {
+    const config = ENGINE_CONFIG[engineName];
+    if (!config) return null;
+
+    try {
+        const command = process.platform === 'win32'
+            ? `where ${config.binaryName}`
+            : `which ${config.binaryName}`;
+        const result = execSync(command, {
+            encoding: 'utf8',
+            stdio: ['pipe', 'pipe', 'pipe']
+        }).trim();
+
+        const binPath = result.split('\n')[0].trim();
+        if (binPath && fs.existsSync(binPath)) {
+            const resolvedPath = resolvePathSafe(binPath) || binPath;
+            if (resolvedPath) {
+                const isExecutable = resolvedPath.endsWith('.js') || resolvedPath.endsWith('.cjs') || resolvedPath.endsWith('.exe');
+                if (!isExecutable) {
+                    const shimDir = path.dirname(binPath);
+                    const cliJsPath = path.join(shimDir, 'node_modules', config.npmPackage, config.npmEntry);
+                    if (fs.existsSync(cliJsPath)) {
+                        return { path: cliJsPath, source: `npm (${engineName})` };
+                    }
+                    return { path: resolvedPath, source: `PATH (${engineName})` };
+                }
+                return { path: resolvedPath, source: `PATH (${engineName})` };
+            }
+        }
+    } catch (e) {}
+
+    try {
+        const globalRoot = execSync('npm root -g', { encoding: 'utf8' }).trim();
+        const globalCliPath = path.join(globalRoot, config.npmPackage, config.npmEntry);
+        if (fs.existsSync(globalCliPath)) {
+            return { path: globalCliPath, source: `npm (${engineName})` };
+        }
+    } catch (e) {}
+
+    return null;
+}
+
+/**
  * Find path to globally installed Claude Code CLI
- * Priority: HAPPY_CLAUDE_PATH env var > PATH > npm > Bun > Homebrew > Native
+ * Priority: HAPPY_CLAUDE_PATH env var > MT_HAPPY_ENGINE > PATH > npm > Bun > Homebrew > Native
  * @returns {{path: string, source: string}|null} Path and source, or null if not found
  */
 function findGlobalClaudeCliPath() {
@@ -442,11 +509,18 @@ function findGlobalClaudeCliPath() {
         return { path: resolved, source: 'HAPPY_CLAUDE_PATH' };
     }
 
-    // 2. Check PATH (respects user's shell config)
+    // 2. MT_HAPPY_ENGINE - engine-specific discovery
+    const engine = process.env.MT_HAPPY_ENGINE;
+    if (engine && ENGINE_CONFIG[engine]) {
+        const engineResult = findEngineCliPath(engine);
+        if (engineResult) return engineResult;
+    }
+
+    // 3. Check PATH (respects user's shell config)
     const pathResult = findClaudeInPath();
     if (pathResult) return pathResult;
 
-    // 3. Fall back to package manager detection
+    // 4. Fall back to package manager detection
     const npmPath = findNpmGlobalCliPath();
     if (npmPath) return { path: npmPath, source: 'npm' };
 
@@ -503,8 +577,9 @@ function compareVersions(a, b) {
 function getClaudeCliPath() {
     const result = findGlobalClaudeCliPath();
     if (!result) {
-        console.error('\n\x1b[1m\x1b[33mClaude Code is not installed\x1b[0m\n');
-        console.error('Please install Claude Code using one of these methods:\n');
+        const engine = process.env.MT_HAPPY_ENGINE || 'claude';
+        console.error(`\n\x1b[1m\x1b[33m${engine} CLI is not installed\x1b[0m\n`);
+        console.error('Please install the CLI using one of these methods:\n');
         console.error('\x1b[1mOption 1 - npm (recommended, highest priority):\x1b[0m');
         console.error('  \x1b[36mnpm install -g @anthropic-ai/claude-code\x1b[0m\n');
         console.error('\x1b[1mOption 2 - Homebrew (macOS/Linux):\x1b[0m');
@@ -513,7 +588,11 @@ function getClaudeCliPath() {
         console.error('  \x1b[90mmacOS/Linux:\x1b[0m  \x1b[36mcurl -fsSL https://claude.ai/install.sh | bash\x1b[0m');
         console.error('  \x1b[90mPowerShell:\x1b[0m   \x1b[36mirm https://claude.ai/install.ps1 | iex\x1b[0m');
         console.error('  \x1b[90mWindows CMD:\x1b[0m  \x1b[36mcurl -fsSL https://claude.ai/install.cmd -o install.cmd && install.cmd && del install.cmd\x1b[0m\n');
-        console.error('\x1b[90mNote: If multiple installations exist, npm takes priority.\x1b[0m\n');
+        if (engine !== 'claude') {
+            console.error(`\x1b[90mNote: MT_HAPPY_ENGINE is set to "${engine}". Ensure the corresponding CLI is installed.\x1b[0m\n`);
+        } else {
+            console.error('\x1b[90mNote: If multiple installations exist, npm takes priority.\x1b[0m\n');
+        }
         process.exit(1);
     }
 
@@ -540,7 +619,16 @@ function runClaudeCli(cliPath) {
     // Check if it's a JavaScript file (.js or .cjs) or a binary file
     const isJsFile = cliPath.endsWith('.js') || cliPath.endsWith('.cjs');
 
-    if (isJsFile) {
+    // Check if it's a Node.js script without .js extension
+    let isNodeScript = false;
+    if (!isJsFile) {
+        try {
+            const firstLine = fs.readFileSync(cliPath, 'utf8').split('\n')[0];
+            isNodeScript = firstLine.startsWith('#!/usr/bin/env node') || firstLine.startsWith('#!/usr/bin/node');
+        } catch (e) {}
+    }
+
+    if (isJsFile || isNodeScript) {
         // JavaScript file - use import to keep interceptors working
         const importUrl = pathToFileURL(cliPath).href;
         import(importUrl);
@@ -607,6 +695,8 @@ function runClaudeCli(cliPath) {
 }
 
 module.exports = {
+    ENGINE_CONFIG,
+    findEngineCliPath,
     findGlobalClaudeCliPath,
     findClaudeInPath,
     detectSourceFromPath,

@@ -36,6 +36,9 @@ import { RawJSONLinesSchema, type RawJSONLines } from './types';
 /** JavaScript runtime to use for spawning Claude Code */
 export type JsRuntime = 'node' | 'bun'
 
+/** CLI engine to use for spawning Claude Code */
+export type CliEngine = 'claude-internal' | 'codebuddy' | 'claude'
+
 export interface StartOptions {
     model?: string
     permissionMode?: PermissionMode
@@ -47,6 +50,8 @@ export interface StartOptions {
     noSandbox?: boolean
     /** JavaScript runtime to use for spawning Claude Code (default: 'node') */
     jsRuntime?: JsRuntime
+    /** CLI engine to use (default: 'claude-internal') */
+    engine?: CliEngine
 }
 
 const DEFAULT_CLAUDE_PERMISSION_MODE: PermissionMode = 'yolo';
@@ -124,7 +129,7 @@ export async function runClaude(credentials: Credentials, options: StartOptions 
         // Initialize lifecycle state
         lifecycleState: 'running',
         lifecycleStateSince: Date.now(),
-        flavor: 'claude',
+        flavor: options.engine || 'claude-internal',
         sandbox: sandboxConfig?.enabled ? sandboxConfig : null,
         dangerouslySkipPermissions,
         ...(forkedFromSessionId ? { parentSessionId: forkedFromSessionId } : {}),
@@ -193,6 +198,7 @@ export async function runClaude(credentials: Credentials, options: StartOptions 
                 mcpServers: {},
                 allowedTools: [],
                 sandboxConfig,
+                engine: options.engine,
             });
         } finally {
             reconnection.cancel();
@@ -795,7 +801,8 @@ export async function runClaude(credentials: Credentials, options: StartOptions 
         claudeArgs: options.claudeArgs,
         sandboxConfig,
         hookSettingsPath,
-        jsRuntime: options.jsRuntime
+        jsRuntime: options.jsRuntime,
+        engine: options.engine
     });
 
     // Cleanup session resources (intervals, callbacks) - prevents memory leak

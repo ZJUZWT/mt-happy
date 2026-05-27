@@ -1,5 +1,5 @@
 {
-  "name": "happy",
+  "name": "mt-happy",
   "version": "1.1.10-beta.7",
   "description": "Mobile and Web client for Claude Code and Codex",
   "author": "Kirill Dubovitskiy",
@@ -12,8 +12,8 @@
     "url": "https://github.com/slopus/happy"
   },
   "bin": {
-    "happy": "./bin/happy.mjs",
-    "happy-mcp": "./bin/happy-mcp.mjs"
+    "mt-happy": "./bin/mt-happy.mjs",
+    "mt-happy-mcp": "./bin/mt-happy-mcp.mjs"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",

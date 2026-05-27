@@ -33,13 +33,17 @@ class Configuration {
     const args = process.argv.slice(2)
     this.isDaemonProcess = args.length >= 2 && args[0] === 'daemon' && (args[1] === 'start-sync')
 
-    // Directory configuration - Priority: HAPPY_HOME_DIR env > default home dir
-    if (process.env.HAPPY_HOME_DIR) {
+    // Directory configuration - Priority: MT_HAPPY_HOME_DIR > HAPPY_HOME_DIR env > default home dir
+    if (process.env.MT_HAPPY_HOME_DIR) {
+      // Expand ~ to home directory if present
+      const expandedPath = process.env.MT_HAPPY_HOME_DIR.replace(/^~/, homedir())
+      this.happyHomeDir = expandedPath
+    } else if (process.env.HAPPY_HOME_DIR) {
       // Expand ~ to home directory if present
       const expandedPath = process.env.HAPPY_HOME_DIR.replace(/^~/, homedir())
       this.happyHomeDir = expandedPath
     } else {
-      this.happyHomeDir = join(homedir(), '.happy')
+      this.happyHomeDir = join(homedir(), '.mt-happy')
     }
 
     this.logsDir = join(this.happyHomeDir, 'logs')

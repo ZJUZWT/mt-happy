@@ -2,7 +2,7 @@ import { ApiClient, ApiSessionClient } from "@/lib";
 import { MessageQueue2 } from "@/utils/MessageQueue2";
 import { EnhancedMode } from "./loop";
 import { logger } from "@/ui/logger";
-import type { JsRuntime } from "./runClaude";
+import type { JsRuntime, CliEngine } from "./runClaude";
 import type { SandboxConfig } from "@/persistence";
 
 export class Session {
@@ -22,6 +22,8 @@ export class Session {
     readonly hookSettingsPath: string;
     /** JavaScript runtime to use for spawning Claude Code (default: 'node') */
     readonly jsRuntime: JsRuntime;
+    /** CLI engine to use (default: 'claude-internal') */
+    readonly engine: CliEngine;
 
     sessionId: string | null;
     mode: 'local' | 'remote' = 'local';
@@ -51,6 +53,8 @@ export class Session {
         hookSettingsPath: string,
         /** JavaScript runtime to use for spawning Claude Code (default: 'node') */
         jsRuntime?: JsRuntime,
+        /** CLI engine to use (default: 'claude-internal') */
+        engine?: CliEngine,
     }) {
         this.path = opts.path;
         this.api = opts.api;
@@ -67,6 +71,7 @@ export class Session {
         this._onAbort = opts.onAbort;
         this.hookSettingsPath = opts.hookSettingsPath;
         this.jsRuntime = opts.jsRuntime ?? 'node';
+        this.engine = opts.engine ?? 'claude-internal';
 
         // Start keep alive
         this.client.keepAlive(this.thinking, this.mode);

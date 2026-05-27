@@ -83,8 +83,8 @@ export function spawnHappyCLI(args: string[], options: SpawnOptions = {}): Child
   // However, we log it as 'happy' here because other engineers are typically looking
   // for when "happy" was started and don't care about the underlying node process
   // details and flags we use to achieve the same result.
-  const fullCommand = `happy ${args.join(' ')}`;
-  logger.debug(`[SPAWN HAPPY CLI] Spawning: ${fullCommand} in ${directory}`);
+  const fullCommand = `mt-happy ${args.join(' ')}`;
+  logger.debug(`[SPAWN MT-HAPPY CLI] Spawning: ${fullCommand} in ${directory}`);
   
   // Use the same Node.js flags that the wrapper script uses
   const nodeArgs = [
@@ -97,7 +97,7 @@ export function spawnHappyCLI(args: string[], options: SpawnOptions = {}): Child
   // Sanity check of the entrypoint path exists
   if (!existsSync(entrypoint)) {
     const errorMessage = `Entrypoint ${entrypoint} does not exist`;
-    logger.debug(`[SPAWN HAPPY CLI] ${errorMessage}`);
+    logger.debug(`[SPAWN MT-HAPPY CLI] ${errorMessage}`);
     throw new Error(errorMessage);
   }
   

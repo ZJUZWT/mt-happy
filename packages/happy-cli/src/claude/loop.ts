@@ -5,7 +5,7 @@ import { Session } from "./session"
 import { claudeLocalLauncher, LauncherResult } from "./claudeLocalLauncher"
 import { claudeRemoteLauncher } from "./claudeRemoteLauncher"
 import { ApiClient } from "@/lib"
-import type { JsRuntime } from "./runClaude"
+import type { JsRuntime, CliEngine } from "./runClaude"
 import type { SandboxConfig } from "@/persistence"
 
 // Re-export permission mode type from api/types
@@ -47,6 +47,8 @@ interface LoopOptions {
     hookSettingsPath: string
     /** JavaScript runtime to use for spawning Claude Code (default: 'node') */
     jsRuntime?: JsRuntime
+    /** CLI engine to use (default: 'claude-internal') */
+    engine?: CliEngine
 }
 
 export async function loop(opts: LoopOptions): Promise<number> {
@@ -68,7 +70,8 @@ export async function loop(opts: LoopOptions): Promise<number> {
         onModeChange: opts.onModeChange,
         onAbort: opts.onAbort,
         hookSettingsPath: opts.hookSettingsPath,
-        jsRuntime: opts.jsRuntime
+        jsRuntime: opts.jsRuntime,
+        engine: opts.engine
     });
 
     opts.onSessionReady?.(session)
