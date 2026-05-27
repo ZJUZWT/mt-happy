@@ -634,7 +634,23 @@ function runClaudeCli(cliPath) {
     }
 
     if (isJsFile || isNodeScript) {
-        // JavaScript file - use import to keep interceptors working
+        // For non-default engines (claude-internal, codebuddy, codex), always spawn
+        // instead of import() because their bundles are CJS and don't work well
+        // with the import() trick designed for @anthropic-ai/claude-code's ESM cli.js
+        const engine = process.env.MT_HAPPY_ENGINE;
+        if (engine && engine !== 'claude') {
+            const args = process.argv.slice(2);
+            const child = spawn('node', [cliPath, ...args], {
+                stdio: 'inherit',
+                env: process.env
+            });
+            child.on('exit', (code) => {
+                process.exit(code || 0);
+            });
+            return;
+        }
+
+        // Default (claude): use import to keep fetch interceptors working
         const importUrl = pathToFileURL(cliPath).href;
         import(importUrl);
         return;
