@@ -20,7 +20,7 @@ type PendingRequest = {
 }
 
 const DEFAULT_SERVER_URL = 'https://api.cluster-fluster.com'
-const DEFAULT_WEBAPP_URL = 'https://app.happy.engineering'
+const DEFAULT_WEBAPP_URL = 'https://mt.hk.swannzh.icu'
 
 let worker: Worker | null = null
 let latestState: HappyStateSnapshot = {

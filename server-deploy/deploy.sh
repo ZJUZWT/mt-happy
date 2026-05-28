@@ -1,6 +1,6 @@
 #!/bin/bash
 # 在服务器上执行这个脚本完成部署
-# 用法: scp deploy.sh root@42.192.105.114:/opt/ && ssh root@42.192.105.114 "bash /opt/deploy.sh"
+# 用法: scp deploy.sh root@43.161.220.202:/opt/ && ssh root@43.161.220.202 "bash /opt/deploy.sh"
 
 # 1. 复制启动脚本
 cp /opt/start.sh /opt/mt-happy/start.sh

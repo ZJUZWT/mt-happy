@@ -10,7 +10,7 @@
 
 | 资源 | 地址 |
 |------|------|
-| 我们的服务器 (API + Web) | https://swann.phlax.top |
+| 我们的服务器 (API + Web) | https://mt.hk.swannzh.icu |
 | 上游仓库 | https://github.com/slopus/happy |
 | 官方 Web App (CDN) | https://app.happy.engineering |
 | 官方文档 | https://happy.engineering/docs/ |
@@ -28,10 +28,10 @@ cd packages/happy-cli
 npm run build && npm link
 
 # 启动 session
-HAPPY_SERVER_URL=https://swann.phlax.top mt-happy --engine claude-internal
+HAPPY_SERVER_URL=https://mt.hk.swannzh.icu mt-happy --engine claude-internal
 
 # 启动 daemon（设备保持在线）
-HAPPY_SERVER_URL=https://swann.phlax.top mt-happy daemon start
+HAPPY_SERVER_URL=https://mt.hk.swannzh.icu mt-happy daemon start
 ```
 
 ## 服务器部署
@@ -46,3 +46,4 @@ git checkout mt-happy
 git merge upstream/main
 git push origin mt-happy
 ```
+# MARKER
