@@ -43,10 +43,10 @@ function run(cmd, args, { allowFailure = false } = {}) {
 }
 
 run('pnpm', ['run', 'build']);
-run('happy', ['daemon', 'stop'], { allowFailure: true });
+run('mt-happy', ['daemon', 'stop'], { allowFailure: true });
 run('npm', ['link']);
-run('happy', ['daemon', 'start']);
-run('happy', ['--version']);
+run('mt-happy', ['daemon', 'start']);
+run('mt-happy', ['--version']);
 
 console.log(`\n✓ Installed from ${PACKAGE_DIR}`);
 console.log('  To undo: npm unlink -g happy && npm i -g happy@latest');

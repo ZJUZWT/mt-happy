@@ -8,7 +8,7 @@
 
 
 import chalk from 'chalk'
-import { runClaude, StartOptions } from '@/claude/runClaude'
+import { runClaude, StartOptions, CliEngine } from '@/claude/runClaude'
 import { logger } from './ui/logger'
 import { readCredentials, readSettings } from './persistence'
 import { authAndSetupMachineIfNeeded } from './ui/auth'
@@ -627,7 +627,7 @@ ${chalk.bold('To clean up runaway processes:')} Use ${chalk.cyan('happy doctor c
           console.error(chalk.red(`Invalid --engine value: ${engine}. Must be 'claude-internal', 'codebuddy', 'codex', or 'claude'`))
           process.exit(1)
         }
-        options.engine = engine
+        options.engine = engine as CliEngine
       } else if (arg === '--offline' || arg === '--local') {
         offlineMode = true
       } else if (arg === '--claude-env') {
@@ -746,7 +746,7 @@ ${chalk.bold.cyan('Claude Code Options (from `claude --help`):')}
     // Show version
     if (showVersion) {
       console.log(`mt-happy version: ${packageJson.version}`)
-      // Don't exit - continue to pass --version to Claude Code
+      process.exit(0)
     }
 
     // Offline mode - skip auth and run Claude directly
