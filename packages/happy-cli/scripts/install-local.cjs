@@ -45,8 +45,19 @@ function run(cmd, args, { allowFailure = false } = {}) {
 run('pnpm', ['run', 'build']);
 run('mt-happy', ['daemon', 'stop'], { allowFailure: true });
 run('npm', ['link']);
-run('mt-happy', ['daemon', 'start']);
-run('mt-happy', ['--version']);
+// Post-link probes are best-effort: on Windows the freshly-written npm shim
+// may not be visible to this child shell yet (PATH is cached in the parent
+// process). A failure here does NOT mean the install failed — the shim is on
+// disk and a fresh shell will pick it up. Downstream steps (e.g. writing
+// ~/.mt-happy/settings.json) must not be blocked by this.
+const daemonStatus = run('mt-happy', ['daemon', 'start'], { allowFailure: true });
+const versionStatus = run('mt-happy', ['--version'], { allowFailure: true });
+
+if (daemonStatus !== 0 || versionStatus !== 0) {
+    console.warn('\n⚠ Post-link probes failed (likely stale PATH in this shell).');
+    console.warn('  The npm link itself succeeded — open a fresh terminal and run');
+    console.warn('  `mt-happy --version` to confirm, then `mt-happy daemon start`.');
+}
 
 console.log(`\n✓ Installed from ${PACKAGE_DIR}`);
 console.log('  To undo: npm unlink -g happy && npm i -g happy@latest');
