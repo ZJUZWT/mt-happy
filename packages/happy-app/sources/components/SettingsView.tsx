@@ -29,6 +29,8 @@ import { useProfile } from '@/sync/storage';
 import { getDisplayName, getAvatarUrl, getBio } from '@/sync/profile';
 import { Avatar } from '@/components/Avatar';
 import { t } from '@/text';
+import { getServerUrl } from '@/sync/serverConfig';
+import * as Clipboard from 'expo-clipboard';
 
 type BuildConfig = {
     buildCommitSha?: unknown;
@@ -361,6 +363,29 @@ export const SettingsView = React.memo(function SettingsView() {
                     )}
                 </ItemGroup>
             )}
+
+            {/* Server & Token */}
+            <ItemGroup title="Server">
+                <Item
+                    title="Copy Token"
+                    subtitle="Copy auth token to clipboard"
+                    icon={<Ionicons name="key-outline" size={29} color="#FF9500" />}
+                    onPress={async () => {
+                        const token = auth.credentials?.token;
+                        if (token) {
+                            await Clipboard.setStringAsync(token);
+                            Modal.alert('Copied', 'Token copied to clipboard');
+                        }
+                    }}
+                    showChevron={false}
+                />
+                <Item
+                    title={t('server.serverConfiguration')}
+                    subtitle={getServerUrl()}
+                    icon={<Ionicons name="server-outline" size={29} color="#5856D6" />}
+                    onPress={() => router.push('/server')}
+                />
+            </ItemGroup>
 
             {/* Features */}
             <ItemGroup title={t('settings.features')}>

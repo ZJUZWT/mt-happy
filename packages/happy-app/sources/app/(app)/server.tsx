@@ -80,7 +80,7 @@ export default function ServerConfigScreen() {
     const styles = stylesheet;
     const router = useRouter();
     const serverInfo = getServerInfo();
-    const [inputUrl, setInputUrl] = useState(serverInfo.isCustom ? getServerUrl() : '');
+    const [inputUrl, setInputUrl] = useState(getServerUrl());
     const [error, setError] = useState<string | null>(null);
     const [isValidating, setIsValidating] = useState(false);
 
