@@ -73,19 +73,17 @@ function NotAuthenticated() {
                             }}
                         />
                     </View>
-                    <View style={styles.buttonContainerSecondary}>
+                    <View style={styles.buttonContainer}>
                         <RoundButton
-                            size="normal"
-                            title={t('welcome.createAccount')}
-                            action={createAccount}
-                            display="inverted"
+                            title="使用 Token 登录"
+                            onPress={() => router.push('/restore/token')}
                         />
                     </View>
                     <View style={styles.buttonContainerSecondary}>
                         <RoundButton
                             size="normal"
-                            title="Login with Token"
-                            onPress={() => router.push('/restore/token')}
+                            title={t('welcome.createAccount')}
+                            action={createAccount}
                             display="inverted"
                         />
                     </View>
@@ -142,19 +140,17 @@ function NotAuthenticated() {
                                     }}
                                 />
                             </View>
-                            <View style={styles.landscapeButtonContainerSecondary}>
+                            <View style={styles.landscapeButtonContainer}>
                                 <RoundButton
-                                    size="normal"
-                                    title={t('welcome.createAccount')}
-                                    action={createAccount}
-                                    display="inverted"
+                                    title="使用 Token 登录"
+                                    onPress={() => router.push('/restore/token')}
                                 />
                             </View>
                             <View style={styles.landscapeButtonContainerSecondary}>
                                 <RoundButton
                                     size="normal"
-                                    title="Login with Token"
-                                    onPress={() => router.push('/restore/token')}
+                                    title={t('welcome.createAccount')}
+                                    action={createAccount}
                                     display="inverted"
                                 />
                             </View>
