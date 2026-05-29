@@ -334,10 +334,19 @@ export async function runClaude(credentials: Credentials, options: StartOptions 
     // can't see.
     const initialScannerSessionId = forkClaudeSessionId
         ?? (metadata.claudeSessionId ?? null);
-    const remoteScanner = await createSessionScanner({
-        sessionId: initialScannerSessionId,
-        workingDirectory,
-        onMessage: (raw) => {
+
+    // Non-claude engines (codebuddy, codex) don't produce Claude JSONL session files,
+    // so skip the file watcher to avoid ENOENT loops. Remote messages still flow
+    // through the SDK streaming pipeline.
+    const engineName = process.env.MT_HAPPY_ENGINE || 'claude-internal';
+    const skipSessionScanner = engineName === 'codebuddy';
+
+    const remoteScanner = skipSessionScanner
+        ? { cleanup: async () => {}, setSessionId: (_id: string) => {}, onNewSession: async (_id: string, _opts?: any) => {} }
+        : await createSessionScanner({
+            sessionId: initialScannerSessionId,
+            workingDirectory,
+            onMessage: (raw) => {
             // Only user-typed prompts. SDK pipeline owns assistant and
             // tool_result-bearing user messages.
             if (raw.type !== 'user') return;
