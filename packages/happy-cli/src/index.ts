@@ -44,6 +44,13 @@ import { handleCodexCommand } from './commands/codexCommand'
     logger.debug('Starting happy CLI with args: ', process.argv)
   }
 
+  // Shorthand: "mt-happy codebuddy" / "mt-happy claude-internal" → rewrite to --engine flag
+  // Must happen before subcommand detection so it falls through to default runClaude path
+  if (args[0] === 'codebuddy' || args[0] === 'claude-internal') {
+    const engineArg = args.shift()!
+    args.unshift('--engine', engineArg)
+  }
+
   // Check if first argument is a subcommand
   const subcommand = args[0]
   
@@ -121,10 +128,6 @@ Conversation history is preserved on the server, but in-flight tool calls are in
       process.exit(1)
     }
     return;
-  } else if (subcommand === 'codebuddy' || subcommand === 'claude-internal') {
-    // Shorthand: "mt-happy codebuddy" is equivalent to "mt-happy --engine codebuddy"
-    args.shift()
-    args.unshift('--engine', subcommand)
   } else if (subcommand === 'bye') {
     console.log('Bye!');
     process.exit(0);
