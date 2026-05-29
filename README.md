@@ -45,6 +45,45 @@ mt-happy daemon start
 
 见 [docs/self-hosting.md](docs/self-hosting.md)
 
+## 部署验证（Smoke Test）
+
+内置自动化测试脚本，验证服务器全链路：Auth → 加密 Session → 发送消息 → 取回解密 → WebSocket。
+
+```bash
+# 人类友好输出
+tsx scripts/smoke-test.ts
+
+# 指定服务器
+tsx scripts/smoke-test.ts https://mt.swannzh.icu
+
+# JSON 输出（供 AI agent / CI 解析）
+tsx scripts/smoke-test.ts --json
+
+# 跳过 WebSocket 测试
+tsx scripts/smoke-test.ts --no-ws
+
+# 固定 seed（可复现，适合 CI）
+tsx scripts/smoke-test.ts --seed <64位hex>
+```
+
+**无需浏览器** — 使用 Ed25519 直接签名认证，AI agent 可以独立完成部署后验证。
+
+输出示例：
+```
+🔍 MT-Happy Smoke Test
+   Server: https://mt.swannzh.icu
+
+✅ auth                 269ms   token_length=279
+✅ create_session       121ms   session_id=cmpq...
+✅ send_message          59ms   local_id=smoke-...
+✅ retrieve_message      40ms   decrypted=true
+✅ websocket            129ms   connected=true transport=websocket
+✅ cleanup                0ms
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ All 6/6 checks passed in 618ms
+```
+
 ## 同步上游
 
 ```bash
