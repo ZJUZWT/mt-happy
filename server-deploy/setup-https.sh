@@ -5,13 +5,13 @@
 yum install -y nginx openssl
 
 # 2. 生成自签证书
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/server.key -out /etc/nginx/server.crt -subj "/CN=42.192.105.114"
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/server.key -out /etc/nginx/server.crt -subj "/CN=43.161.220.202"
 
 # 3. 写 nginx 配置
 cat > /etc/nginx/conf.d/mt-happy.conf << 'ENDOFFILE'
 server {
     listen 443 ssl;
-    server_name 42.192.105.114;
+    server_name 43.161.220.202;
     ssl_certificate /etc/nginx/server.crt;
     ssl_certificate_key /etc/nginx/server.key;
 
@@ -36,5 +36,5 @@ echo "===== 验证 ====="
 curl -sk https://localhost/ && echo "" && echo "HTTPS OK!"
 echo ""
 echo "记得去腾讯云安全组开放 443 端口！"
-echo "然后浏览器访问 https://42.192.105.114 接受证书"
-echo "app 里填 https://42.192.105.114"
+echo "然后浏览器访问 https://43.161.220.202 接受证书"
+echo "app 里填 https://43.161.220.202"

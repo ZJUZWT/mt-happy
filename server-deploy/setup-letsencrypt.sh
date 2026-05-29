@@ -3,7 +3,7 @@
 
 # 先确保 DNS 已生效
 echo "检查 DNS..."
-host swann.phlax.top || nslookup swann.phlax.top || echo "DNS查不到，确认A记录已配置！"
+host mt.hk.swannzh.icu || nslookup mt.hk.swannzh.icu || echo "DNS查不到，确认A记录已配置！"
 
 # 安装 certbot（OpenCloudOS/CentOS）
 yum install -y epel-release 2>/dev/null
@@ -13,14 +13,14 @@ yum install -y certbot 2>/dev/null || pip3 install certbot
 systemctl stop nginx
 
 # 申请证书
-certbot certonly --standalone -d swann.phlax.top --non-interactive --agree-tos --email admin@phlax.top
+certbot certonly --standalone -d mt.hk.swannzh.icu --non-interactive --agree-tos --email admin@phlax.top
 
 # 检查证书是否成功
-if [ -f /etc/letsencrypt/live/swann.phlax.top/fullchain.pem ]; then
+if [ -f /etc/letsencrypt/live/mt.hk.swannzh.icu/fullchain.pem ]; then
     echo "证书申请成功！"
 else
     echo "证书申请失败！请确认："
-    echo "1. swann.phlax.top 的 A 记录指向 42.192.105.114"
+    echo "1. mt.hk.swannzh.icu 的 A 记录指向 43.161.220.202"
     echo "2. 安全组 80 和 443 端口已开放"
     echo "3. 域名能从外网解析"
     systemctl start nginx
@@ -31,15 +31,15 @@ fi
 cat > /etc/nginx/conf.d/mt-happy.conf << 'ENDOFFILE'
 server {
     listen 80;
-    server_name swann.phlax.top;
+    server_name mt.hk.swannzh.icu;
     return 301 https://$host$request_uri;
 }
 
 server {
     listen 443 ssl;
-    server_name swann.phlax.top;
-    ssl_certificate /etc/letsencrypt/live/swann.phlax.top/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/swann.phlax.top/privkey.pem;
+    server_name mt.hk.swannzh.icu;
+    ssl_certificate /etc/letsencrypt/live/mt.hk.swannzh.icu/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/mt.hk.swannzh.icu/privkey.pem;
 
     location / {
         proxy_pass http://127.0.0.1:3000;
@@ -66,4 +66,4 @@ nginx -t && systemctl start nginx
 
 # 验证
 echo ""
-curl -s https://swann.phlax.top/ && echo " - HTTPS OK!" || echo "HTTPS 验证失败"
+curl -s https://mt.hk.swannzh.icu/ && echo " - HTTPS OK!" || echo "HTTPS 验证失败"

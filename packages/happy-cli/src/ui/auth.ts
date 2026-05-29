@@ -272,16 +272,17 @@ export async function authAndSetupMachineIfNeeded(): Promise<{
         logger.debug('[AUTH] Using existing credentials');
     }
 
-    // Make sure we have a machine ID
+    // Make sure we have a machine ID and persist server URLs
     // Server machine entity will be created either by the daemon or by the CLI
     const settings = await updateSettings(async s => {
+        const updated = { ...s };
         if (newAuth || !s.machineId) {
-            return {
-                ...s,
-                machineId: randomUUID()
-            };
+            updated.machineId = randomUUID();
         }
-        return s;
+        // Always persist the current server URLs so the user knows which server they authed against
+        updated.serverUrl = configuration.serverUrl;
+        updated.webappUrl = configuration.webappUrl;
+        return updated;
     });
 
     logger.debug(`[AUTH] Machine ID: ${settings.machineId}`);
