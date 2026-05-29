@@ -50,10 +50,20 @@ function findEngineCliPath(engineName: string): string | null {
             stdio: ['pipe', 'pipe', 'pipe']
         }).trim()
 
-        const binPath = result.split('\n')[0].trim()
+        const lines = result.split('\n').map(l => l.trim()).filter(Boolean)
+
+        // On Windows, prefer the .cmd shim (directly spawnable)
+        if (process.platform === 'win32') {
+            const cmdShim = lines.find(l => l.endsWith('.cmd'))
+            if (cmdShim && existsSync(cmdShim)) {
+                return cmdShim
+            }
+        }
+
+        const binPath = lines[0]
         if (binPath && existsSync(binPath)) {
             // Check if it's a shim that points to a JS entry
-            const isExecutable = binPath.endsWith('.js') || binPath.endsWith('.cjs') || binPath.endsWith('.exe')
+            const isExecutable = binPath.endsWith('.js') || binPath.endsWith('.cjs') || binPath.endsWith('.exe') || binPath.endsWith('.cmd')
             if (!isExecutable) {
                 // Try to find the actual JS entry via npm package structure
                 const shimDir = dirname(binPath)
