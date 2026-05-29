@@ -256,7 +256,13 @@ export default function RootLayout() {
                 }
 
                 if (credentials) {
-                    await syncRestore(credentials);
+                    // Guard: skip sync if secret is empty/invalid (corrupted credentials)
+                    if (!credentials.secret) {
+                        await TokenStorage.removeCredentials();
+                        credentials = null;
+                    } else {
+                        await syncRestore(credentials);
+                    }
                 }
 
                 setInitState({ credentials });
