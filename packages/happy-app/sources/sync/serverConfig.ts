@@ -5,7 +5,7 @@ const serverConfigStorage = new MMKV({ id: 'server-config' });
 
 const SERVER_KEY = 'custom-server-url';
 const LOG_SERVER_KEY = 'log-server-url';
-const DEFAULT_SERVER_URL = 'https://mt.hk.swannzh.icu';
+const DEFAULT_SERVER_URL = 'https://mt.swannzh.icu';
 
 export function getServerUrl(): string {
     return serverConfigStorage.getString(SERVER_KEY) ||

@@ -53,14 +53,14 @@ class Configuration {
     this.daemonLockFile = join(this.happyHomeDir, 'daemon.state.json.lock')
     this.sessionsFile = join(this.happyHomeDir, 'sessions.json')
 
-    // URL precedence (both): HAPPY_*_URL env > settings.<key> > default.
-    // Settings are read sync here (avoid circular import with persistence.ts).
-    // webappUrl must follow the same chain as serverUrl, otherwise `happy server`
-    // self-host points the API at localhost but auth still opens the prod webapp.
+    // URL precedence: HAPPY_*_URL env > settings.<key> > default.
+    // serverUrl = API endpoint (CLI, mobile app, daemon connect here)
+    // webappUrl = Web App in browser (auth flow opens here)
+    // These are intentionally separate: server may be on a different domain than webapp.
     this.serverUrl =
       process.env.HAPPY_SERVER_URL ||
       readSettingsStringSync(this.settingsFile, 'serverUrl') ||
-      'https://mt.hk.swannzh.icu'
+      'https://mt.swannzh.icu'
     this.webappUrl =
       process.env.HAPPY_WEBAPP_URL ||
       readSettingsStringSync(this.settingsFile, 'webappUrl') ||
