@@ -17,8 +17,10 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children, initialCredentials }: { children: ReactNode; initialCredentials: AuthCredentials | null }) {
-    const [isAuthenticated, setIsAuthenticated] = useState(!!initialCredentials);
-    const [credentials, setCredentials] = useState<AuthCredentials | null>(initialCredentials);
+    // Guard: if stored credentials have empty/invalid secret, discard them
+    const validCredentials = initialCredentials?.secret ? initialCredentials : null;
+    const [isAuthenticated, setIsAuthenticated] = useState(!!validCredentials);
+    const [credentials, setCredentials] = useState<AuthCredentials | null>(validCredentials);
 
     // Update global auth state when local state changes
     useEffect(() => {
