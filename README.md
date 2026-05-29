@@ -41,6 +41,18 @@ mt-happy daemon start
 > HAPPY_SERVER_URL=https://mt.swannzh.icu mt-happy
 > ```
 
+## 手机 App 连接
+
+官方 Happy App（iOS/Android）默认连接官方服务器，需要手动切换到我们的服务器：
+
+1. 打开 Happy App → 设置 → 版本号
+2. **连续点击版本号 10 次**开启开发者模式
+3. 出现「Developer Tools」入口 → 进入 → Server Configuration
+4. 填入服务器地址：`https://mt.swannzh.icu`
+5. 保存后 App 会连接到我们的服务器
+
+> **提示：** Web App 地址是 `https://mt.hk.swannzh.icu`，可以直接在浏览器打开使用，无需配置。
+
 ## 服务器部署
 
 见 [docs/self-hosting.md](docs/self-hosting.md)
