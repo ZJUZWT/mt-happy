@@ -75,7 +75,7 @@ function NotAuthenticated() {
                     </View>
                     <View style={styles.buttonContainer}>
                         <RoundButton
-                            title="使用 Token 登录"
+                            title="使用密钥登录"
                             onPress={() => router.push('/restore/token')}
                         />
                     </View>
@@ -142,7 +142,7 @@ function NotAuthenticated() {
                             </View>
                             <View style={styles.landscapeButtonContainer}>
                                 <RoundButton
-                                    title="使用 Token 登录"
+                                    title="使用密钥登录"
                                     onPress={() => router.push('/restore/token')}
                                 />
                             </View>

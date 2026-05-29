@@ -53,18 +53,17 @@ export default function TokenLogin() {
         const trimmedToken = tokenInput.trim();
 
         if (!trimmedToken) {
-            Modal.alert('Error', 'Please enter a token');
+            Modal.alert('错误', '请输入密钥');
             return;
         }
 
         try {
-            // Token login uses a dummy secret since we only have the token
-            // The token itself is sufficient for API access
+            // Login directly with the token (secret key)
             await auth.login(trimmedToken, '');
             router.back();
         } catch (error) {
             console.error('Token login error:', error);
-            Modal.alert('Error', 'Failed to login with the provided token. Please check and try again.');
+            Modal.alert('错误', '登录失败，请检查密钥是否正确');
         }
     };
 
@@ -73,8 +72,7 @@ export default function TokenLogin() {
             <View style={styles.container}>
                 <View style={styles.contentWrapper}>
                     <Text style={styles.instructionText}>
-                        Paste your authentication token below to login directly.
-                        You can get this token from another device's Settings → Copy Token.
+                        粘贴您的登录密钥。可以在其他设备的 设置 → 复制密钥 中获取。
                     </Text>
 
                     <TextInput
@@ -90,7 +88,7 @@ export default function TokenLogin() {
                     />
 
                     <RoundButton
-                        title="Login with Token"
+                        title="使用密钥登录"
                         action={handleLogin}
                     />
                 </View>
