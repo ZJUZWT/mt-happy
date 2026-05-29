@@ -431,6 +431,7 @@ function SessionViewLoaded({ sessionId, session }: { sessionId: string, session:
     const { messages, isLoaded } = useSessionMessages(sessionId);
     const acknowledgedCliVersions = useLocalSetting('acknowledgedCliVersions');
     const zenMode = useLocalSetting('zenMode');
+    const bottomPadding = useLocalSetting('bottomPadding');
     const sessionInputHorizontalPadding = Platform.OS === 'web' || isRunningOnMac() || isTablet ? 12 : 8;
 
     // Check if CLI version is outdated and not already acknowledged
@@ -765,7 +766,7 @@ function SessionViewLoaded({ sessionId, session }: { sessionId: string, session:
             )}
 
             {/* Main content area - no padding since header is overlay */}
-            <View style={{ flexBasis: 0, flexGrow: 1, paddingBottom: safeArea.bottom + (Platform.OS === 'web' ? 24 : 0) }}>
+            <View style={{ flexBasis: 0, flexGrow: 1, paddingBottom: safeArea.bottom + (Platform.OS === 'web' ? 24 : 0) + bottomPadding }}>
                 <AgentContentView
                     content={content}
                     input={input}

@@ -87,6 +87,7 @@ export const SettingsView = React.memo(function SettingsView() {
     const versionSubtitle = formatBuildSubtitle(getBuildConfig());
     const auth = useAuth();
     const [devModeEnabled, setDevModeEnabled] = useLocalSettingMutable('devModeEnabled');
+    const [bottomPaddingSetting, setBottomPadding] = useLocalSettingMutable('bottomPadding');
     const isPro = __DEV__ || useEntitlement('pro');
     const experiments = useSetting('experiments');
     const isCustomServer = isUsingCustomServer();
@@ -384,6 +385,25 @@ export const SettingsView = React.memo(function SettingsView() {
                     subtitle={getServerUrl()}
                     icon={<Ionicons name="server-outline" size={29} color="#5856D6" />}
                     onPress={() => router.push('/server')}
+                />
+                <Item
+                    title="底部间距"
+                    subtitle={`${bottomPaddingSetting}px — 手机浏览器底部被遮挡时调大`}
+                    icon={<Ionicons name="resize-outline" size={29} color="#34C759" />}
+                    onPress={async () => {
+                        const value = await Modal.prompt(
+                            '底部间距',
+                            '输入额外的底部间距（像素），手机浏览器建议 40-80',
+                            { placeholder: String(bottomPaddingSetting), confirmText: '保存' }
+                        );
+                        if (value !== null && value !== undefined) {
+                            const num = parseInt(value.trim(), 10);
+                            if (!isNaN(num) && num >= 0 && num <= 200) {
+                                setBottomPadding(num);
+                            }
+                        }
+                    }}
+                    showChevron={false}
                 />
             </ItemGroup>
 
