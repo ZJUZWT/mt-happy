@@ -81,6 +81,14 @@ function NotAuthenticated() {
                             display="inverted"
                         />
                     </View>
+                    <View style={styles.buttonContainerSecondary}>
+                        <RoundButton
+                            size="normal"
+                            title="Login with Token"
+                            onPress={() => router.push('/restore/token')}
+                            display="inverted"
+                        />
+                    </View>
                 </>
             ) : (
                 <>
@@ -139,6 +147,14 @@ function NotAuthenticated() {
                                     size="normal"
                                     title={t('welcome.createAccount')}
                                     action={createAccount}
+                                    display="inverted"
+                                />
+                            </View>
+                            <View style={styles.landscapeButtonContainerSecondary}>
+                                <RoundButton
+                                    size="normal"
+                                    title="Login with Token"
+                                    onPress={() => router.push('/restore/token')}
                                     display="inverted"
                                 />
                             </View>
