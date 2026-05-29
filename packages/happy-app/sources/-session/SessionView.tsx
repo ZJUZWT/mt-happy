@@ -22,7 +22,7 @@ import { voiceHooks } from '@/realtime/hooks/voiceHooks';
 import { getCurrentVoiceConversationId, getCurrentVoiceSessionDurationSeconds, startRealtimeSession, stopRealtimeSession } from '@/realtime/RealtimeSession';
 import { gitStatusSync } from '@/sync/gitStatusSync';
 import { sessionAbort } from '@/sync/ops';
-import { storage, useIsDataReady, useLocalSetting, useRealtimeStatus, useSessionMessages, useSessionUsage, useSetting } from '@/sync/storage';
+import { storage, useIsDataReady, useLocalSetting, useLocalSettingMutable, useRealtimeStatus, useSessionMessages, useSessionUsage, useSetting } from '@/sync/storage';
 import { useSession } from '@/sync/storage';
 import { Session } from '@/sync/storageTypes';
 import { sync } from '@/sync/sync';
@@ -431,7 +431,7 @@ function SessionViewLoaded({ sessionId, session }: { sessionId: string, session:
     const { messages, isLoaded } = useSessionMessages(sessionId);
     const acknowledgedCliVersions = useLocalSetting('acknowledgedCliVersions');
     const zenMode = useLocalSetting('zenMode');
-    const bottomPadding = useLocalSetting('bottomPadding');
+    const [bottomPadding, setBottomPadding] = useLocalSettingMutable('bottomPadding');
     const sessionInputHorizontalPadding = Platform.OS === 'web' || isRunningOnMac() || isTablet ? 12 : 8;
 
     // Check if CLI version is outdated and not already acknowledged
@@ -773,6 +773,40 @@ function SessionViewLoaded({ sessionId, session }: { sessionId: string, session:
                     placeholder={placeholder}
                 />
             </View >
+
+            {/* Bottom padding adjuster - floating button top right */}
+            {Platform.OS === 'web' && (
+                <Pressable
+                    onPress={async () => {
+                        const value = await Modal.prompt(
+                            '底部间距',
+                            '输入额外底部间距(px)，建议40-80',
+                            { placeholder: String(bottomPadding), confirmText: '保存' }
+                        );
+                        if (value !== null && value !== undefined) {
+                            const num = parseInt(value.trim(), 10);
+                            if (!isNaN(num) && num >= 0 && num <= 200) {
+                                setBottomPadding(num);
+                            }
+                        }
+                    }}
+                    style={{
+                        position: 'absolute',
+                        top: safeArea.top + 52,
+                        right: 12,
+                        width: 32,
+                        height: 32,
+                        borderRadius: 16,
+                        backgroundColor: theme.colors.surface,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        opacity: 0.6,
+                        zIndex: 999,
+                    }}
+                >
+                    <Ionicons name="resize-outline" size={16} color={theme.colors.textSecondary} />
+                </Pressable>
+            )}
 
             {/* Back button for landscape phone mode when header is hidden */}
             {
