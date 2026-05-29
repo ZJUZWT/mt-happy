@@ -49,13 +49,14 @@ export function AuthProvider({ children, initialCredentials }: { children: React
         }
         clearPersistence();
         await TokenStorage.removeCredentials();
-        
-        // Update React state to ensure UI consistency
+
+        // Update React state — this triggers re-render to NotAuthenticated view
         setCredentials(null);
         setIsAuthenticated(false);
-        
+
         if (Platform.OS === 'web') {
-            window.location.reload();
+            // Navigate to root to show login page immediately
+            window.location.href = '/';
         } else {
             try {
                 await Updates.reloadAsync();
