@@ -371,9 +371,9 @@ export const SettingsView = React.memo(function SettingsView() {
                     subtitle="复制登录密钥到剪贴板"
                     icon={<Ionicons name="key-outline" size={29} color="#FF9500" />}
                     onPress={async () => {
-                        const token = auth.credentials?.token;
-                        if (token) {
-                            await Clipboard.setStringAsync(token);
+                        const secret = auth.credentials?.secret;
+                        if (secret) {
+                            await Clipboard.setStringAsync(secret);
                             Modal.alert('已复制', '密钥已复制到剪贴板');
                         }
                     }}

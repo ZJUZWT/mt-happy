@@ -7,6 +7,9 @@ import { Typography } from '@/constants/Typography';
 import { layout } from '@/components/layout';
 import { Modal } from '@/modal';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
+import { normalizeSecretKey } from '@/auth/secretKeyBackup';
+import { authGetToken } from '@/auth/authGetToken';
+import { decodeBase64 } from '@/encryption/base64';
 
 const stylesheet = StyleSheet.create((theme) => ({
     scrollView: {
@@ -47,22 +50,32 @@ export default function TokenLogin() {
     const styles = stylesheet;
     const auth = useAuth();
     const router = useRouter();
-    const [tokenInput, setTokenInput] = useState('');
+    const [secretInput, setSecretInput] = useState('');
 
     const handleLogin = async () => {
-        const trimmedToken = tokenInput.trim();
+        const trimmed = secretInput.trim();
 
-        if (!trimmedToken) {
+        if (!trimmed) {
             Modal.alert('错误', '请输入密钥');
             return;
         }
 
         try {
-            // Login directly with the token (secret key)
-            await auth.login(trimmedToken, '');
+            const normalizedKey = normalizeSecretKey(trimmed);
+            const secretBytes = decodeBase64(normalizedKey, 'base64url');
+            if (secretBytes.length !== 32) {
+                throw new Error('Invalid secret key length');
+            }
+
+            const token = await authGetToken(secretBytes);
+            if (!token) {
+                throw new Error('Failed to authenticate with provided key');
+            }
+
+            await auth.login(token, normalizedKey);
             router.back();
         } catch (error) {
-            console.error('Token login error:', error);
+            console.error('Secret key login error:', error);
             Modal.alert('错误', '登录失败，请检查密钥是否正确');
         }
     };
@@ -77,11 +90,11 @@ export default function TokenLogin() {
 
                     <TextInput
                         style={styles.textInput}
-                        placeholder="eyJhbGciOiJFZERTQSJ9..."
+                        placeholder="XXXXX-XXXXX-XXXXX..."
                         placeholderTextColor={theme.colors.input.placeholder}
-                        value={tokenInput}
-                        onChangeText={setTokenInput}
-                        autoCapitalize="none"
+                        value={secretInput}
+                        onChangeText={setSecretInput}
+                        autoCapitalize="characters"
                         autoCorrect={false}
                         multiline={true}
                         numberOfLines={4}
