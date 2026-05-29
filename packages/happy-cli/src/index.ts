@@ -627,7 +627,7 @@ ${chalk.bold('To clean up runaway processes:')} Use ${chalk.cyan('happy doctor c
           console.error(chalk.red(`Invalid --engine value: ${engine}. Must be 'claude-internal', 'codebuddy', 'codex', or 'claude'`))
           process.exit(1)
         }
-        options.engine = engine
+        options.engine = engine as import('./claude/runClaude').CliEngine
       } else if (arg === '--offline' || arg === '--local') {
         offlineMode = true
       } else if (arg === '--claude-env') {
