@@ -8,17 +8,23 @@ export type LauncherResult = { type: 'switch' } | { type: 'exit', code: number }
 
 export async function claudeLocalLauncher(session: Session): Promise<LauncherResult> {
 
+    // Non-claude engines (codebuddy) don't produce Claude JSONL files — skip file watcher
+    const engineName = process.env.MT_HAPPY_ENGINE || 'claude-internal';
+    const skipScanner = engineName === 'codebuddy';
+
     // Create scanner
-    const scanner = await createSessionScanner({
-        sessionId: session.sessionId,
-        workingDirectory: session.path,
-        onMessage: (message) => { 
-            // Block SDK summary messages - we generate our own
-            if (message.type !== 'summary') {
-                session.client.sendClaudeSessionMessage(message)
+    const scanner = skipScanner
+        ? { cleanup: async () => {}, onNewSession: async (_id: string, _opts?: any) => {} }
+        : await createSessionScanner({
+            sessionId: session.sessionId,
+            workingDirectory: session.path,
+            onMessage: (message) => {
+                // Block SDK summary messages - we generate our own
+                if (message.type !== 'summary') {
+                    session.client.sendClaudeSessionMessage(message)
+                }
             }
-        }
-    });
+        });
     
     // Register callback to notify scanner when session ID is found via hook
     // This is important for --continue/--resume where session ID is not known upfront
