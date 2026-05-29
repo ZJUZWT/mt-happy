@@ -121,6 +121,10 @@ Conversation history is preserved on the server, but in-flight tool calls are in
       process.exit(1)
     }
     return;
+  } else if (subcommand === 'codebuddy' || subcommand === 'claude-internal') {
+    // Shorthand: "mt-happy codebuddy" is equivalent to "mt-happy --engine codebuddy"
+    args.shift()
+    args.unshift('--engine', subcommand)
   } else if (subcommand === 'bye') {
     console.log('Bye!');
     process.exit(0);
