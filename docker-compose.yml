@@ -25,6 +25,7 @@ services:
       - PGLITE_DIR=/data/pglite
       - HANDY_MASTER_SECRET=${HANDY_MASTER_SECRET:-change-me-in-production}
       - PORT=3005
+      - HAPPY_INJECT_HTML_CONFIG={"serverUrl":"https://mt.hk.swannzh.icu"}
     expose:
       - "3005"
 
