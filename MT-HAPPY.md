@@ -39,7 +39,7 @@ The script does five steps and prints progress:
 |------|---------|
 | `-Force` | Skip interactive confirmations (overwrite existing install, clean broken `node_modules`). Use this when running from automation or a fresh machine. |
 | `-SkipInstall` | Skip `pnpm install`, only build + link. Useful when iterating on source code. |
-| `-ServerUrl <url>` | Override the default server URL (`https://swann.phlax.top`). |
+| `-ServerUrl <url>` | Override the default server URL (`https://mt.hk.swannzh.icu`). |
 
 ---
 
@@ -104,7 +104,7 @@ The CLI resolves the server URL in this order (first match wins):
 1. `HAPPY_SERVER_URL` environment variable
 2. `serverUrl` field in `~/.mt-happy/settings.json`
 3. Built-in default (`https://api.cluster-fluster.com` upstream — but on the
-   `mt-happy` branch the installer fills in `https://swann.phlax.top` at step 5)
+   `mt-happy` branch the installer fills in `https://mt.hk.swannzh.icu` at step 5)
 
 ---
 
@@ -117,7 +117,11 @@ The CLI resolves the server URL in this order (first match wins):
 
 ## Self-hosting (all-in-one)
 
-Everything runs on a single HK server at `mt.hk.swannzh.icu`:
+Everything runs on a single HK server at `mt.hk.swannzh.icu` using Docker.
+The stack is: `Dockerfile.allinone` + `docker-compose.yml` + `deploy/nginx.conf`.
+
+The server injects `__HAPPY_CONFIG__` at runtime so the webapp knows its own URL
+without a user-configurable settings page.
 
 ```bash
 # On the server:
@@ -136,7 +140,9 @@ bash deploy/deploy-hk.sh
 After deployment:
 - Webapp: https://mt.hk.swannzh.icu
 - API: https://mt.hk.swannzh.icu/v1/
-- WebSocket: wss://mt.hk.swannzh.icu/socket.io/
+- WebSocket: wss://mt.hk.swannzh.icu/v1/updates
+
+Nginx must forward WebSocket upgrade headers on all paths (see `deploy/nginx.conf`).
 
 The CLI default server URL is `https://mt.hk.swannzh.icu`. Mobile app connects
 to the same URL for both API and webapp.
@@ -151,12 +157,6 @@ git checkout mt-happy
 git merge upstream/main
 git push origin mt-happy
 ```
-
----
-
-## Self-hosting the server
-
-See [docs/self-hosting.md](docs/self-hosting.md).
 
 ---
 
