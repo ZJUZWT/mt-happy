@@ -14,7 +14,6 @@ import { ItemList } from '@/components/ItemList';
 import { useConnectTerminal } from '@/hooks/useConnectTerminal';
 import { useEntitlement, useLocalSettingMutable, useSetting } from '@/sync/storage';
 import { sync } from '@/sync/sync';
-import { isUsingCustomServer } from '@/sync/serverConfig';
 import { trackPaywallButtonClicked, trackWhatsNewClicked } from '@/track';
 import { Modal } from '@/modal';
 import { useMultiClick } from '@/hooks/useMultiClick';
@@ -29,7 +28,6 @@ import { useProfile } from '@/sync/storage';
 import { getDisplayName, getAvatarUrl, getBio } from '@/sync/profile';
 import { Avatar } from '@/components/Avatar';
 import { t } from '@/text';
-import { getServerUrl } from '@/sync/serverConfig';
 import * as Clipboard from 'expo-clipboard';
 
 type BuildConfig = {
@@ -89,7 +87,6 @@ export const SettingsView = React.memo(function SettingsView() {
     const [devModeEnabled, setDevModeEnabled] = useLocalSettingMutable('devModeEnabled');
     const isPro = __DEV__ || useEntitlement('pro');
     const experiments = useSetting('experiments');
-    const isCustomServer = isUsingCustomServer();
     const [showOfflineMachines, setShowOfflineMachines] = React.useState(false);
     const allMachinesWithOffline = useAllMachines({ includeOffline: true });
     const offlineMachineCount = React.useMemo(
@@ -378,12 +375,6 @@ export const SettingsView = React.memo(function SettingsView() {
                         }
                     }}
                     showChevron={false}
-                />
-                <Item
-                    title={t('server.serverConfiguration')}
-                    subtitle={getServerUrl()}
-                    icon={<Ionicons name="server-outline" size={29} color="#5856D6" />}
-                    onPress={() => router.push('/server')}
                 />
             </ItemGroup>
 
