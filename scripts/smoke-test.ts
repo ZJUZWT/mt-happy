@@ -17,7 +17,7 @@
  *   --timeout <ms>   Per-step timeout in ms (default: 10000)
  *
  * Environment:
- *   HAPPY_SERVER_URL  Default server URL (fallback: https://mt.swannzh.icu)
+ *   HAPPY_SERVER_URL  Default server URL (fallback: https://mt.hk.swannzh.icu)
  *   SMOKE_TEST_SEED   Fixed seed in hex (alternative to --seed)
  *
  * Exit codes:
@@ -506,7 +506,7 @@ function printJson(results: StepResult[], serverUrl: string, totalMs: number) {
 
 function parseArgs(): Options {
     const args = process.argv.slice(2);
-    let serverUrl = process.env.HAPPY_SERVER_URL || 'https://mt.swannzh.icu';
+    let serverUrl = process.env.HAPPY_SERVER_URL || 'https://mt.hk.swannzh.icu';
     let json = false;
     let verbose = false;
     let seed: Uint8Array | null = null;

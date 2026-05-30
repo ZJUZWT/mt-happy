@@ -115,6 +115,34 @@ The CLI resolves the server URL in this order (first match wins):
 
 ---
 
+## Self-hosting (all-in-one)
+
+Everything runs on a single HK server at `mt.hk.swannzh.icu`:
+
+```bash
+# On the server:
+git clone -b mt-happy <repo-url> mt-happy && cd mt-happy
+mkdir -p certs
+
+# SSL cert
+sudo certbot certonly --standalone -d mt.hk.swannzh.icu
+cp /etc/letsencrypt/live/mt.hk.swannzh.icu/fullchain.pem certs/
+cp /etc/letsencrypt/live/mt.hk.swannzh.icu/privkey.pem certs/
+
+# Deploy
+bash deploy/deploy-hk.sh
+```
+
+After deployment:
+- Webapp: https://mt.hk.swannzh.icu
+- API: https://mt.hk.swannzh.icu/v1/
+- WebSocket: wss://mt.hk.swannzh.icu/socket.io/
+
+The CLI default server URL is `https://mt.hk.swannzh.icu`. Mobile app connects
+to the same URL for both API and webapp.
+
+---
+
 ## Sync from upstream
 
 ```bash

@@ -19,7 +19,7 @@ type PendingRequest = {
     reject: (error: Error) => void
 }
 
-const DEFAULT_SERVER_URL = 'https://mt.swannzh.icu'
+const DEFAULT_SERVER_URL = 'https://mt.hk.swannzh.icu'
 const DEFAULT_WEBAPP_URL = 'https://mt.hk.swannzh.icu'
 
 let worker: Worker | null = null

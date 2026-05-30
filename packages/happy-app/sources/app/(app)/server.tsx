@@ -88,25 +88,27 @@ export default function ServerConfigScreen() {
         try {
             setIsValidating(true);
             setError(null);
-            
-            const response = await fetch(url, {
+
+            // Check /health endpoint — works in both standalone and all-in-one mode
+            const healthUrl = url.replace(/\/+$/, '') + '/health';
+            const response = await fetch(healthUrl, {
                 method: 'GET',
                 headers: {
-                    'Accept': 'text/plain'
+                    'Accept': 'application/json'
                 }
             });
-            
+
             if (!response.ok) {
                 setError(t('server.serverReturnedError'));
                 return false;
             }
-            
-            const text = await response.text();
-            if (!text.includes('Welcome to Happy Server!')) {
+
+            const data = await response.json();
+            if (data?.service !== 'happy-server') {
                 setError(t('server.notValidHappyServer'));
                 return false;
             }
-            
+
             return true;
         } catch (err) {
             setError(t('server.failedToConnectToServer'));

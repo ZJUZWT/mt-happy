@@ -5,7 +5,7 @@
  *   ts-node test-auth-cli.ts [--server <url>] [--secret <base64>]
  * 
  * Environment variables:
- *   HAPPY_SERVER_URL - Server URL (default: https://mt.swannzh.icu)
+ *   HAPPY_SERVER_URL - Server URL (default: https://mt.hk.swannzh.icu)
  *   HAPPY_HOME_DIR - Home directory for credentials
  */
 

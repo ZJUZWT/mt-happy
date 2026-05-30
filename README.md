@@ -1,6 +1,6 @@
 # mt-happy (Fork)
 
-本仓库是 [happy-coder](https://github.com/slopus/happy) 的 fork，`mt-hk-happy` 分支包含以下定制：
+本仓库是 [happy-coder](https://github.com/slopus/happy) 的 fork，`mt-happy` 分支包含以下定制：
 
 - 多引擎支持（claude-internal / codebuddy / codex / claude）
 - 自建服务器支持（数据不经过第三方）
@@ -10,16 +10,14 @@
 
 | 资源 | 地址 | 说明 |
 |------|------|------|
-| Server (API) | https://mt.swannzh.icu | CLI/App 连接此地址 |
-| Web App | https://mt.hk.swannzh.icu | 浏览器访问，auth 审批 |
+| Server + Web App | https://mt.hk.swannzh.icu | API + Webapp 统一地址 |
 | 上游仓库 | https://github.com/slopus/happy | |
 | 官方 Web App | https://app.happy.engineering | 原版 CDN |
 
 ## 分支
 
 - `main` — 同步上游原始代码
-- `mt-happy` — 国内服定制分支
-- `mt-hk-happy` — HK 服定制分支（当前活跃）
+- `mt-happy` — 定制分支（当前活跃）
 
 ## 快速上手
 
@@ -38,7 +36,7 @@ mt-happy daemon start
 > **注意：** auth 完成后，`serverUrl` 和 `webappUrl` 会自动写入 `~/.mt-happy/settings.json`。
 > 如果需要切换服务器，编辑该文件或设置环境变量：
 > ```bash
-> HAPPY_SERVER_URL=https://mt.swannzh.icu mt-happy
+> HAPPY_SERVER_URL=https://mt.hk.swannzh.icu mt-happy
 > ```
 
 ## 手机 App 连接
@@ -48,14 +46,14 @@ mt-happy daemon start
 1. 打开 Happy App → 设置 → 版本号
 2. **连续点击版本号 10 次**开启开发者模式
 3. 出现「Developer Tools」入口 → 进入 → Server Configuration
-4. 填入服务器地址：`https://mt.swannzh.icu`
+4. 填入服务器地址：`https://mt.hk.swannzh.icu`
 5. 保存后 App 会连接到我们的服务器
 
 > **提示：** Web App 地址是 `https://mt.hk.swannzh.icu`，可以直接在浏览器打开使用，无需配置。
 
 ## 服务器部署
 
-见 [docs/self-hosting.md](docs/self-hosting.md)
+见 [deploy/deploy-hk.sh](deploy/deploy-hk.sh) 或 MT-HAPPY.md 中的 "Self-hosting" 章节。
 
 ## 部署验证（Smoke Test）
 
@@ -66,7 +64,7 @@ mt-happy daemon start
 tsx scripts/smoke-test.ts
 
 # 指定服务器
-tsx scripts/smoke-test.ts https://mt.swannzh.icu
+tsx scripts/smoke-test.ts https://mt.hk.swannzh.icu
 
 # JSON 输出（供 AI agent / CI 解析）
 tsx scripts/smoke-test.ts --json
@@ -83,7 +81,7 @@ tsx scripts/smoke-test.ts --seed <64位hex>
 输出示例：
 ```
 🔍 MT-Happy Smoke Test
-   Server: https://mt.swannzh.icu
+   Server: https://mt.hk.swannzh.icu
 
 ✅ auth                 269ms   token_length=279
 ✅ create_session       121ms   session_id=cmpq...

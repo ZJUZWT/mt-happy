@@ -1,0 +1,45 @@
+# mt-happy all-in-one deployment (HK server)
+# Single container serves both API + webapp on port 3005
+# Nginx handles SSL termination + proxies to the container
+#
+# Usage:
+#   docker compose up -d --build
+#
+# Prerequisites:
+#   - SSL certs in ./certs/ (fullchain.pem + privkey.pem)
+
+services:
+  # All-in-one: API + Webapp in one container
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.allinone
+      args:
+        HAPPY_SERVER_URL: https://mt.hk.swannzh.icu
+    restart: unless-stopped
+    volumes:
+      - app-data:/data
+    environment:
+      - NODE_ENV=production
+      - DATA_DIR=/data
+      - PGLITE_DIR=/data/pglite
+      - HANDY_MASTER_SECRET=${HANDY_MASTER_SECRET:-change-me-in-production}
+      - PORT=3005
+    expose:
+      - "3005"
+
+  # Nginx: SSL termination + reverse proxy
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - app
+
+volumes:
+  app-data:

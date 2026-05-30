@@ -43,7 +43,7 @@ npx tsx packages/happy-agent/src/test-auth-cli.ts --secret $(node -e "console.lo
 Success case:
 ```
 🔧 MT-Happy E2E Auth Test
-📍 Server: https://mt.swannzh.icu
+📍 Server: https://mt.hk.swannzh.icu
 
 ⏱️  Running E2E test...
 
@@ -128,7 +128,7 @@ e2e-test:
     - npx tsx packages/happy-agent/src/test-auth-cli.ts
   environment:
     name: production
-    url: https://mt.swannzh.icu
+    url: https://mt.hk.swannzh.icu
   when: manual
 ```
 
@@ -136,7 +136,7 @@ e2e-test:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `HAPPY_SERVER_URL` | `https://mt.swannzh.icu` | Server URL to test against |
+| `HAPPY_SERVER_URL` | `https://mt.hk.swannzh.icu` | Server URL to test against |
 | `HAPPY_HOME_DIR` | `~/.happy` | Home directory for credentials |
 
 ## CLI Options

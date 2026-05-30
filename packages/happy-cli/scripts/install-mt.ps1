@@ -28,7 +28,7 @@
 param(
     [switch] $SkipInstall,
     [switch] $Force,
-    [string] $ServerUrl = 'https://swann.phlax.top'
+    [string] $ServerUrl = 'https://mt.hk.swannzh.icu'
 )
 
 Set-StrictMode -Version Latest

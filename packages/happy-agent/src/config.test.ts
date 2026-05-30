@@ -18,7 +18,7 @@ describe('config', () => {
     describe('defaults', () => {
         it('uses default server URL', () => {
             const config = loadConfig();
-            expect(config.serverUrl).toBe('https://mt.swannzh.icu');
+            expect(config.serverUrl).toBe('https://mt.hk.swannzh.icu');
         });
 
         it('uses default home directory', () => {
